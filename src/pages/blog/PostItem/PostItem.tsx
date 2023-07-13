@@ -5,7 +5,7 @@ const PostItem = () => {
     <div className='flex flex-col items-center overflow-hidden rounded-lg border md:flex-row'>
       <div className='group relative block h-48 w-full shrink-0 self-start overflow-hidden bg-gray-100 md:h-full md:w-32 lg:w-48'>
         <img
-        src='https://img.thuthuatphanmem.vn/uploads/2018/10/09/anh-dep-nhat-the-gioi-ve-thien-nhien_041753462.jpg'
+          src='https://img.thuthuatphanmem.vn/uploads/2018/10/09/anh-dep-nhat-the-gioi-ve-thien-nhien_041753462.jpg'
           loading='lazy'
           className='absolute inset-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110'
         />
