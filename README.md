@@ -1,27 +1,14 @@
-### 1. Tạo project với Vit
-```bash
-yarn add tailwindcss postcss autoprefixer -D
-```
-### 2. Generate file `tailwind.config.js`
-```bash
-npx tailwindcss init -p
-```
-### 3.Edit file `tailwind.config.js`
+## createAction
+`createAction` là một helper function dùng để tạo một Redux action
 ```ts
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
+function createAction(type,prepareAction?)
 ```
-### 4. Edit file `index.css`
-```bash
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+Ví dụ: Tạo createAction cho action increment trong Counter
+```ts
+import { createAction } from "@reduxjs/toolkit";
+const increment = createAction<number|undefined>('counter/increment')
+let action = increment()
+// return {type:'counter/increment'}
+action = increment(3)
+// return {type:'counter/increment', payload:3}
 ```

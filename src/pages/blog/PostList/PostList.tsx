@@ -4,8 +4,7 @@ import { RootState } from '~/store'
 import PostItem from '../PostItem'
 
 const PostList = () => {
-  const postList = useSelector((state:RootState) => state.blog.postList)
-  console.log(postList);
+  const postList = useSelector((state: RootState) => state.blog.postList)
 
   return (
     <div className='bg-white py-6 sm:py-8 lg:py-12'>
@@ -17,9 +16,7 @@ const PostList = () => {
           </p>
         </div>
         <div className='grid gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-2 xl:grid-cols-2 xl:gap-8'>
-          {
-            postList.length > 0 && postList.map((post)=><PostItem post={post} key={post.id} />) 
-          }
+          {postList.length > 0 && postList.map((post) => <PostItem post={post} key={post.id} />)}
         </div>
       </div>
     </div>

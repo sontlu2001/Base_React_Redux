@@ -1,11 +1,11 @@
 import React from 'react'
 import { Post } from '~/types/blog.type'
 
-interface PostItemType{
-  post:Post
-  key:string
+interface PostItemType {
+  post: Post
+  key: string
 }
-const PostItem = ({post}:PostItemType) => {
+const PostItem = ({ post }: PostItemType) => {
   return (
     <div className='flex flex-col items-center overflow-hidden rounded-lg border md:flex-row'>
       <div className='group relative block h-48 w-full shrink-0 self-start overflow-hidden bg-gray-100 md:h-full md:w-32 lg:w-48'>
