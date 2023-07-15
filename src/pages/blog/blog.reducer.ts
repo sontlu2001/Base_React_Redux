@@ -1,4 +1,4 @@
-import { createAction, createReducer } from '@reduxjs/toolkit'
+import { createAction, createReducer,current } from '@reduxjs/toolkit'
 import { initialPostList } from '~/constants/blog'
 import { Post } from '~/types/blog.type'
 
@@ -46,6 +46,9 @@ const blogReducer = createReducer(initialState, (builder) => {
         return false
       })
       state.editingPost = null
+    })
+    .addMatcher((action)=> action.type.includes('cancel'),(state,action)=>{
+      console.log(current(state));
     })
 })
 
