@@ -28,6 +28,14 @@ export const getPostList = createAsyncThunk('blog/getPostList', async (_, thunkA
   return response.data
 })
 
+export const addPost = createAsyncThunk('blog/addPost', async (body:Omit<Post,'id'>, thunkAPI) => {
+  // Json Server auto generate postId
+  const response = await http.post<Post>('/posts',body, {
+    signal: thunkAPI.signal
+  })
+  return response.data
+})
+
 const blogSlice = createSlice({
   name: 'blog',
   initialState,
@@ -56,22 +64,14 @@ const blogSlice = createSlice({
       })
       state.editingPost = null
     },
-    addPost: {
-      reducer: (state, action: PayloadAction<Post>) => {
-        state.postList.push(action.payload)
-      },
-      prepare: (post: Omit<Post, 'id'>) => ({
-        payload: {
-          ...post,
-          id: nanoid()
-        }
-      })
-    }
   },
   extraReducers: (builder) => {
     builder
       .addCase(getPostList.fulfilled, (state, action) => {
         state.postList = action.payload
+      })
+      .addCase(addPost.fulfilled,(state,action)=>{
+        state.postList.push(action.payload)
       })
       .addMatcher(
         (action) => action.type.includes('cancel'),
@@ -85,6 +85,6 @@ const blogSlice = createSlice({
   }
 })
 
-export const { addPost, cancelEditingPost, deletePost, finishEditingPost, startEditingPost } = blogSlice.actions
+export const {cancelEditingPost, deletePost, finishEditingPost, startEditingPost } = blogSlice.actions
 const blogReducer = blogSlice.reducer
 export default blogReducer

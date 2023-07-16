@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '~/store'
+import { useSelector } from 'react-redux'
+import { RootState, useAppDispatch } from '~/store'
 import { Post } from '~/types/blog.type'
 import { addPost, cancelEditingPost, finishEditingPost } from '../blog.slice'
 
@@ -14,7 +14,7 @@ const initialState: Post = {
 }
 const CreatePost = () => {
   const [formData, setFormData] = useState<Post>(initialState)
-  const dispath = useDispatch()
+  const dispatch = useAppDispatch()
   const editingPost = useSelector((state: RootState) => state.blog.editingPost)
 
   useEffect(() => {
@@ -25,15 +25,14 @@ const CreatePost = () => {
     event.preventDefault()
     // Edit mode
     if (editingPost) {
-      dispath(finishEditingPost(formData))
+      dispatch(finishEditingPost(formData))
     } else {
-      const formDataWithId = { ...formData, id: new Date().toISOString() }
-      dispath(addPost(formDataWithId))
+      dispatch(addPost(formData))
     }
     setFormData(initialState)
   }
   const handleCancelEdittingPost = () => {
-    dispath(cancelEditingPost())
+    dispatch(cancelEditingPost())
   }
 
   return (
@@ -42,7 +41,7 @@ const CreatePost = () => {
         <label
           htmlFor='title'
           className='mb-2 block text-sm font-medium text-gray-900 dark:text-gray-300'
-          onClick={() => dispath({ type: ' blog/clickTitle' })}
+          onClick={() => dispatch({ type: ' blog/clickTitle' })}
         >
           Title
         </label>
