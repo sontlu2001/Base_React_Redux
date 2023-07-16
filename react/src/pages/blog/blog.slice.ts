@@ -28,13 +28,23 @@ export const getPostList = createAsyncThunk('blog/getPostList', async (_, thunkA
   return response.data
 })
 
-export const addPost = createAsyncThunk('blog/addPost', async (body:Omit<Post,'id'>, thunkAPI) => {
+export const addPost = createAsyncThunk('blog/addPost', async (body: Omit<Post, 'id'>, thunkAPI) => {
   // Json Server auto generate postId
-  const response = await http.post<Post>('/posts',body, {
+  const response = await http.post<Post>('/posts', body, {
     signal: thunkAPI.signal
   })
   return response.data
 })
+
+export const editPost = createAsyncThunk(
+  'blog/editPost',
+  async ({ postId, body }: { postId: string; body: Post }, thunkAPI) => {
+    const response = await http.put<Post>(`/posts/${postId}`, body, {
+      signal: thunkAPI.signal
+    })
+    return response.data
+  }
+)
 
 const blogSlice = createSlice({
   name: 'blog',
@@ -63,15 +73,25 @@ const blogSlice = createSlice({
         return false
       })
       state.editingPost = null
-    },
+    }
   },
   extraReducers: (builder) => {
     builder
       .addCase(getPostList.fulfilled, (state, action) => {
         state.postList = action.payload
       })
-      .addCase(addPost.fulfilled,(state,action)=>{
+      .addCase(addPost.fulfilled, (state, action) => {
         state.postList.push(action.payload)
+      })
+      .addCase(editPost.fulfilled, (state, action) => {
+        state.postList.find((post, index) => {
+          if (post.id === action.payload.id) {
+            state.postList[index] = action.payload
+            return true
+          }
+          return false
+        })
+        state.editingPost = null
       })
       .addMatcher(
         (action) => action.type.includes('cancel'),
@@ -85,6 +105,6 @@ const blogSlice = createSlice({
   }
 })
 
-export const {cancelEditingPost, deletePost, finishEditingPost, startEditingPost } = blogSlice.actions
+export const { cancelEditingPost, deletePost, finishEditingPost, startEditingPost } = blogSlice.actions
 const blogReducer = blogSlice.reducer
 export default blogReducer

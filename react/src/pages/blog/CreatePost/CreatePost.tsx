@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '~/store'
 import { Post } from '~/types/blog.type'
-import { addPost, cancelEditingPost, finishEditingPost } from '../blog.slice'
+import { addPost, cancelEditingPost, editPost, finishEditingPost } from '../blog.slice'
 
 const initialState: Post = {
   id: '',
@@ -25,7 +25,10 @@ const CreatePost = () => {
     event.preventDefault()
     // Edit mode
     if (editingPost) {
-      dispatch(finishEditingPost(formData))
+      dispatch(editPost({
+         postId:editingPost.id,
+         body:formData
+      }))
     } else {
       dispatch(addPost(formData))
     }
