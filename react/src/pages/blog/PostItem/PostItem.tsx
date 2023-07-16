@@ -1,5 +1,6 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
+import { useAppDispatch } from '~/store'
 import { Post } from '~/types/blog.type'
 import { deletePost, startEditingPost } from '../blog.slice'
 
@@ -8,7 +9,7 @@ interface PostItemType {
   key: string
 }
 const PostItem = ({ post }: PostItemType) => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const handleDelete = (postId: string) => dispatch(deletePost(postId))
   const handleStartEditing = (postId: string) => dispatch(startEditingPost(postId))
 
