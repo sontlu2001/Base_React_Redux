@@ -39,8 +39,11 @@ const CreatePost = () => {
   return (
     <form className='p-5' onSubmit={handleSubmit} onReset={handleCancelEdittingPost}>
       <div className='mb-6'>
-        <label htmlFor='title' className='mb-2 block text-sm font-medium text-gray-900 dark:text-gray-300' 
-        onClick={()=>dispath({type:' blog/clickTitle'})}>
+        <label
+          htmlFor='title'
+          className='mb-2 block text-sm font-medium text-gray-900 dark:text-gray-300'
+          onClick={() => dispath({ type: ' blog/clickTitle' })}
+        >
           Title
         </label>
         <input

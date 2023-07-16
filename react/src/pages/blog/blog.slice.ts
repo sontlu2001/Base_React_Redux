@@ -8,7 +8,7 @@ interface BlogState {
 }
 
 const initialState: BlogState = {
-  postList: initialPostList,
+  postList: [],
   editingPost: null
 }
 
@@ -54,6 +54,9 @@ const blogSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase('blog/getPostListSuccess', (state, action: any) => {
+        state.postList = action.payload
+      })
       .addMatcher(
         (action) => action.type.includes('cancel'),
         (state, action) => {
@@ -61,7 +64,7 @@ const blogSlice = createSlice({
         }
       )
       .addDefaultCase((state, action) => {
-        console.log('Action default')
+        // console.log('Action default')
       })
   }
 })

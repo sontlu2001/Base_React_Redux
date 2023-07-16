@@ -1,13 +1,13 @@
-import axios,{AxiosInstance} from "axios";
+import axios, { AxiosInstance } from 'axios'
 
-class Http{
-    instance:AxiosInstance
-    constructor(){
-        this.instance = axios.create({
-            baseURL: "http://localhost:2023",
-            timeout: 10000
-        })
-    }
+class Http {
+  instance: AxiosInstance
+  constructor() {
+    this.instance = axios.create({
+      baseURL: 'http://localhost:2023',
+      timeout: 10000
+    })
+  }
 }
 const http = new Http().instance
-export default http 
+export default http
