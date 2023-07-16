@@ -1,210 +1,96 @@
-# createAction
+# createSlice
 
-`createAction` là một helper function dùng để tạo một Redux action
+`createSlice` là sự kết hợp của createReducer và createAction
 
-```ts
-function createAction(type, prepareAction?)
-```
+Lời khuyên nên dùng createSlice thay vì createReducer vì các bạn không cần tạo action, action sẽ tự động generate ra cho các bạn.
 
 ```ts
-import { createAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
 
-const increment = createAction<number | undefined>('counter/increment')
+interface CounterState {
+  value: number
+}
 
-let action = increment()
-// { type: 'counter/increment' }
+const initialState = { value: 0 } as CounterState
 
-action = increment(3)
-// returns { type: 'counter/increment', payload: 3 }
-
-console.log(increment.toString())
-// 'counter/increment'
-
-console.log(`The action type is: ${increment}`)
-// 'The action type is: counter/increment'
-```
-
-## Sử dụng Prepare callback để tinh chỉnh payload
-
-Mặc định bạn truyền vào gì thì payload sẽ là cái đó, trong trường hợp bạn muốn truyền vào x nhưng payload là x + 2 thì bạn có thể dùng prepare function callback
-
-```ts
-import { createAction, nanoid } from '@reduxjs/toolkit'
-
-const addTodo = createAction('todos/add', function prepare(text: string) {
-  return {
-    payload: {
-      text,
-      id: nanoid(),
-      createdAt: new Date().toISOString()
+const counterSlice = createSlice({
+  name: 'counter', // Đây là prefix cho action type của bạn
+  initialState, // Giá trị khởi tạo state cho reducer, cũng có thể là function khởi tạo
+  reducers: {
+    // key name sẽ được dùng để generate ra action
+    increment(state) {
+      state.value++
+    },
+    decrement(state) {
+      state.value--
+    },
+    incrementByAmount(state, action: PayloadAction<number>) {
+      state.value += action.payload
     }
   }
 })
 
-console.log(addTodo('Write more docs'))
-/**
- * {
- *   type: 'todos/add',
- *   payload: {
- *     text: 'Write more docs',
- *     id: '4AJvwMSWEHCchcWYga3dj',
- *     createdAt: '2019-10-03T07:53:36.581Z'
- *   }
- * }
- **/
+// export action được generate ra từ slice
+export const { increment, decrement, incrementByAmount } = counterSlice.actions
+
+// export reducer được generate ra từ slice
+export default counterSlice.reducer
 ```
 
-## Sử dụng với createReducer()
+Với `reducers` trên thì ta không dùng được với những trường hợp
 
-Bởi vì action creator được return từ `createAction()` có method `toString()` bị override rồi, nên ta có thể dễ dàng dùng với `createReducer()`
-# createReducer
+- default case
+- matcher case
 
-Đây là cách tiếp cận reducer kiểu cũ
+=> Nên dùng `extraReducers` trong 2 trường hợp này
 
-```js
-const initialState = { value: 0 }
+Vì đặc tính tự động generate ra action khi dùng `reducers` nên nếu chúng ta sử dụng một thunk thì không nên check trong `reducers` mà hãy check trong `extraReducers`
 
-function counterReducer(state = initialState, action) {
-  switch (action.type) {
-    case 'increment':
-      return { ...state, value: state.value + 1 }
-    case 'decrement':
-      return { ...state, value: state.value - 1 }
-    case 'incrementByAmount':
-      return { ...state, value: state.value + action.payload }
-    default:
-      return state
-  }
-}
-```
+## extraReducers
 
-Cách này khá là phức tạp và dễ gây lỗi, những lỗi này có thể đến từ việc
+`extraReducers` cũng giống `reducers` nhưng nó sẽ không generate ra actions. `extraReducers` cho phép dùng một số tính năng như `addMatcher` hay `addDefaultCase`
 
-- Bạn mutate state
-- Bạn quên return một state mới
-- Bạn quên khai báo default case
-
-Với `createReducer` chúng ta có thể dễ dàng giải quyết các vấn đề trên:
-
-- Chúng ta có thể mutate state nhờ vào thư viện immer được tích hợp bên trong
-- Không cần thiết phải return một state mới
-- Không cần khai báo default case
-
-## Cách dùng với "Builder Callback"
-
-`createReducer` nhận vào 2 param
-
-- **initialState** `State | () => State`: Là state khởi tạo hoặc một function khởi tạo state, function này khá hữu ích khi ta muốn lấy state từ localstorage
-- **builderCallback** `(builder: Builder) => void`: Đây là callback nhận vào tham số là Builder object dùng để định nghĩa các case cho reducer
+> `extraReducers` chính xác giống như reducer trong `createReducer()`
 
 ```ts
-import {
-  createAction,
-  createReducer,
-  AnyAction,
-  PayloadAction
-} from '@reduxjs/toolkit'
-
-const increment = createAction<number>('increment')
-const decrement = createAction<number>('decrement')
-
-function isActionWithNumberPayload(
-  action: AnyAction
-): action is PayloadAction<number> {
-  return typeof action.payload === 'number'
-}
-
-const reducer = createReducer(
-  {
-    counter: 0,
-    sumOfNumberPayloads: 0,
-    unhandledActions: 0
-  },
-  (builder) => {
-    builder
-      // Dùng addCase để thêm case trong trường hợp dùng createAction
-      .addCase(increment, (state, action) => {
-        // mutate state dễ dàng nhờ immer xử lý bên trong
-        // không cần phải return state mới
-        state.counter += action.payload
-      })
-      // Thêm case bằng cách dùng .addCase như muỗi chuỗi line
-      .addCase(decrement, (state, action) => {
-        state.counter -= action.payload
-      })
-      // addMatcher cho phép chúng ta thêm "matcher function"
-      // nếu "matcher function" return true thì nó sẽ nhảy vào case này
-      .addMatcher(isActionWithNumberPayload, (state, action) => {})
-      // nếu muốn thêm default case khi không match case nào cả
-      // thì dùng addDefaultCase
-      .addDefaultCase((state, action) => {})
-  }
-)
-```
-
-## Cách dùng với "Map Object"
-
-Cách này thì ngắn hơn Builder Callback như chỉ hoạt động với Javascript, Typescript thì không hoạt động ổn và ít tương thích với các IDE. Team Redux khuyên dùng Builder Callback hơn là cách này
-
-Nếu dispatch một action thông thường nào mà có type là 'increment' hoặc 'decrement' thì sẽ nhảy vào case dưới
-
-```js
-const incrementAction = {
-  type: 'increment'
-}
-```
-
-```js
-const counterReducer = createReducer(0, {
-  increment: (state, action) => state + action.payload,
-  decrement: (state, action) => state - action.payload
-})
-```
-
-Có thể dùng chung với action mà được tạo từ `createAction`
-
-```js
-const increment = createAction('increment')
+import { createAction, createSlice, Action, AnyAction } from '@reduxjs/toolkit'
+const incrementBy = createAction<number>('incrementBy')
 const decrement = createAction('decrement')
 
-const counterReducer = createReducer(0, {
-  [increment]: (state, action) => state + action.payload,
-  [decrement.type]: (state, action) => state - action.payload
-})
-```
+interface RejectedAction extends Action {
+  error: Error
+}
 
-## Log giá trị draft state trong reducer
+function isRejectedAction(action: AnyAction): action is RejectedAction {
+  return action.type.endsWith('rejected')
+}
 
-draft state là thuật ngữ bên immer, nghĩa là state nháp, đang trong quá trình tính toán
+createSlice({
+  name: 'counter',
+  initialState: 0,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(incrementBy, (state, action) => {})
 
-Khi chúng ta log state này, trình duyệt sẽ hiển thị ra định dạng Proxy khó đọc.
-
-Khi sử dụng `createReducer` hay `createSlice` thì bạn có thể import `current` để phục vụ cho việc log draft state
-
-```ts
-import { createSlice, current } from '@reduxjs/toolkit'
-
-const slice = createSlice({
-  name: 'todos',
-  initialState: [{ id: 1, title: 'Example todo' }],
-  reducers: {
-    addTodo: (state, action) => {
-      console.log('before', current(state))
-      state.push(action.payload)
-      console.log('after', current(state))
-    }
+      .addCase(decrement, (state, action) => {})
+      .addMatcher(isRejectedAction, (state, action) => {})
+      .addDefaultCase((state, action) => {})
   }
 })
 ```
 
-```ts
-import { createAction, createReducer } from '@reduxjs/toolkit'
+`extraReducers` cho phép dùng cú pháp "map object" nhưng với typescript thì chúng ta nên dùng builder callback
 
-const increment = createAction<number>('counter/increment')
-const decrement = createAction<number>('counter/decrement')
+## Tóm lại khi nào dùng reducers, khi nào dùng extraReducers
 
-const counterReducer = createReducer(0, (builder) => {
-  builder.addCase(increment, (state, action) => state + action.payload)
-  builder.addCase(decrement, (state, action) => state - action.payload)
-})
-```
+Dùng reducers khi muốn
+
+- generate ra action
+
+Dùng extraReducers khi
+
+- Không muốn generate action
+- muốn dùng addMatcher, addDefaultCase
+- Khi dùng với createAsyncThunk

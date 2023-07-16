@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { Post } from '~/types/blog.type'
-import { deletePost, startEditingPost } from '../blog.reducer'
+import { deletePost, startEditingPost } from '../blog.slice'
 
 interface PostItemType {
   post: Post

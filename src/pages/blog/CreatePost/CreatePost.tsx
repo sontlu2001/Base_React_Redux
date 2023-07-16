@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '~/store'
 import { Post } from '~/types/blog.type'
-import { addPost, cancelEditingPost, finishEditingPost } from '../blog.reducer'
+import { addPost, cancelEditingPost, finishEditingPost } from '../blog.slice'
 
 const initialState: Post = {
   id: '',
@@ -24,10 +24,9 @@ const CreatePost = () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     // Edit mode
-    if(editingPost){
-      dispath(finishEditingPost(formData)) 
-    }
-    else{
+    if (editingPost) {
+      dispath(finishEditingPost(formData))
+    } else {
       const formDataWithId = { ...formData, id: new Date().toISOString() }
       dispath(addPost(formDataWithId))
     }
@@ -40,7 +39,8 @@ const CreatePost = () => {
   return (
     <form className='p-5' onSubmit={handleSubmit} onReset={handleCancelEdittingPost}>
       <div className='mb-6'>
-        <label htmlFor='title' className='mb-2 block text-sm font-medium text-gray-900 dark:text-gray-300'>
+        <label htmlFor='title' className='mb-2 block text-sm font-medium text-gray-900 dark:text-gray-300' 
+        onClick={()=>dispath({type:' blog/clickTitle'})}>
           Title
         </label>
         <input
