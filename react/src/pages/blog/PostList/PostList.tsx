@@ -1,39 +1,20 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '~/store'
+import { RootState, useAppDispatch } from '~/store'
 import PostItem from '../PostItem'
 import http from '~/utils/http'
+import { getPostList } from '../blog.slice'
 
 const PostList = () => {
   const postList = useSelector((state: RootState) => state.blog.postList)
-  const dispath = useDispatch()
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
-    const controller = new AbortController() // AbortController giúp tránh callAPI liên tục không cần thiết
-    http
-      .get('/posts', {
-        signal: controller.signal
-      })
-      .then((res) => {
-        const postList = res.data
-        dispath({
-          type: 'blog/getPostListSuccess',
-          payload: postList
-        })
-      })
-      .catch((err) => {
-        // Loai bo dispath action do controller.abort()
-        if (!(err.code === 'ERR_CANCELED')) {
-          dispath({
-            type: 'blog/getPostListFailed',
-            payload: err.message
-          })
-        }
-      })
+    const promise = dispatch(getPostList())
     return () => {
-      controller.abort()
+      promise.abort()
     }
-  }, [])
+  }, [dispatch])
 
   return (
     <div className='bg-white py-6 sm:py-8 lg:py-12'>
