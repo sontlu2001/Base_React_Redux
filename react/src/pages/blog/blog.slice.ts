@@ -5,20 +5,29 @@ import {
   nanoid,
   createSlice,
   PayloadAction,
-  createAsyncThunk
+  createAsyncThunk,
+  AsyncThunk
 } from '@reduxjs/toolkit'
 import { initialPostList } from '~/constants/blog'
 import { Post } from '~/types/blog.type'
 import http from '~/utils/http'
 
+type GenericAsyncThunk = AsyncThunk<unknown, unknown, any>
+
+type PendingAction = ReturnType<GenericAsyncThunk['pending']>
+type RejectedAction = ReturnType<GenericAsyncThunk['rejected']>
+type FulfilledAction = ReturnType<GenericAsyncThunk['fulfilled']>
+
 interface BlogState {
   postList: Post[]
   editingPost: Post | null
+  loading: boolean
 }
 
 const initialState: BlogState = {
   postList: [],
-  editingPost: null
+  editingPost: null,
+  loading: false
 }
 
 export const getPostList = createAsyncThunk('blog/getPostList', async (_, thunkAPI) => {
@@ -46,13 +55,12 @@ export const editPost = createAsyncThunk(
   }
 )
 
-export const deletePost = createAsyncThunk('blog/deletePost', async (postId:string, thunkAPI) => {
-   const response = await http.delete<string>(`/posts/${postId}`, {
-      signal: thunkAPI.signal
-    })
-    return response.data
-  }
-)
+export const deletePost = createAsyncThunk('blog/deletePost', async (postId: string, thunkAPI) => {
+  const response = await http.delete<string>(`/posts/${postId}`, {
+    signal: thunkAPI.signal
+  })
+  return response.data
+})
 
 const blogSlice = createSlice({
   name: 'blog',
@@ -85,16 +93,21 @@ const blogSlice = createSlice({
         })
         state.editingPost = null
       })
-      .addCase(deletePost.fulfilled,(state,action)=>{
+      .addCase(deletePost.fulfilled, (state, action) => {
         const postId = action.meta.arg
-        const deletePostIndex = state.postList.findIndex(post => post.id === postId)
-        if(deletePostIndex !== 1)
-          state.postList.splice(deletePostIndex,1)
+        const deletePostIndex = state.postList.findIndex((post) => post.id === postId)
+        if (deletePostIndex !== 1) state.postList.splice(deletePostIndex, 1)
       })
-      .addMatcher(
-        (action) => action.type.includes('cancel'),
+      .addMatcher<PendingAction>(
+        (action) => action.type.endsWith('/pending'),
         (state, action) => {
-          console.log(current(state))
+          state.loading = true
+        }
+      )
+      .addMatcher<FulfilledAction>(
+        (action) => action.type.endsWith('/fulfilled'),
+        (state, action) => {
+          state.loading = false
         }
       )
       .addDefaultCase((state, action) => {

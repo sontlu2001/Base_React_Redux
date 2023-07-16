@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '~/store'
 import { Post } from '~/types/blog.type'
-import { addPost, cancelEditingPost, editPost, finishEditingPost } from '../blog.slice'
+import { addPost, cancelEditingPost, editPost } from '../blog.slice'
 
 const initialState: Post = {
   id: '',
@@ -16,6 +16,7 @@ const CreatePost = () => {
   const [formData, setFormData] = useState<Post>(initialState)
   const dispatch = useAppDispatch()
   const editingPost = useSelector((state: RootState) => state.blog.editingPost)
+  const loading = useSelector((state: RootState) => state.blog.loading)
 
   useEffect(() => {
     setFormData(editingPost || initialState)
@@ -25,10 +26,12 @@ const CreatePost = () => {
     event.preventDefault()
     // Edit mode
     if (editingPost) {
-      dispatch(editPost({
-         postId:editingPost.id,
-         body:formData
-      }))
+      dispatch(
+        editPost({
+          postId: editingPost.id,
+          body: formData
+        })
+      )
     } else {
       dispatch(addPost(formData))
     }
