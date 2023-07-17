@@ -1,9 +1,13 @@
-# createAsyncThunk
+# RTK query dùng các createApi
+- Với createApi chúng ta gọi là `slice api`
+- Chúng ta sẽ khai báo `baseUrl` và các `endpoints`. 
+- `baseQuery` được dùng cho mỗi endpoint để fetch api
+- `fetchBaseQuery` là một function nhỏ được xây dựng trên fetch API
+=> Nó không thay thế hoàn toàn được Axios nhưng sẽ giải quyết được hầu hết các vấn đề của bạn
 
-Trong Redux Toolkit, `createAsyncThunk` là một hàm được cung cấp để xử lý các thao tác bất đồng bộ trong Redux một cách dễ dàng và hiệu quả. Việc sử dụng `createAsyncThunk` trong React Toolkit có một số lợi ích quan trọng sau:
+## endPoints là gì ?
+ **endPoints** là tập hợp những method giúp get, post, put, delete... tương tác với server. Khi khai báo endPoints nó sẽ sinh ra cho chúng ta các hook tương ứng để dùng trong component
 
-- **Giảm thiểu boilerplate code**: `createAsyncThunk` giúp giảm bớt việc phải viết nhiều mã lặp lại cho các tác vụ bất đồng bộ như gửi yêu cầu mạng và xử lý các phản hồi. Nó tự động tạo ra các action creators cho các trạng thái khác nhau (request, success, failure), giúp giảm thiểu công việc lặp đi lặp lại.
-
-- **Xử lý bất đồng bộ một cách dễ dàng**: `createAsyncThunk` giúp đơn giản hóa việc xử lý các thao tác bất đồng bộ trong Redux. Bạn có thể truyền một hàm bất đồng bộ như một tham số vào `createAsyncThunk`, và nó sẽ tự động xử lý việc gọi hàm đó và cập nhật trạng thái của action tương ứng.
-
-- **Quản lý trạng thái dễ dàng**: `createAsyncThunk` quản lý trạng thái của các tác vụ bất đồng bộ một cách tự động. Nó sẽ tự động cập nhật trạng thái loading khi yêu cầu được gửi đi, và cập nhật trạng thái thành công hoặc thất bại khi nhận được phản hồi từ hàm bất đồng bộ.
+Endpoints có **2 kiểu** là `query` và `mutation`.
+- Query: Thường dùng cho GET
+- Mutation: Thường dùng cho các trường hợp thay đổi dữ liệu trên server như POST, PUT, DELETE

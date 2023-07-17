@@ -5,19 +5,12 @@ import PostItem from '../PostItem'
 import http from '~/utils/http'
 import { getPostList } from '../blog.slice'
 import SkeletonPost from '../SkeletonPost'
+import { useGetPostsQuery } from '../blog.service'
 
 const PostList = () => {
-  const postList = useSelector((state: RootState) => state.blog.postList)
-  const loading = useSelector((state: RootState) => state.blog.loading)
-
-  const dispatch = useAppDispatch()
-
-  useEffect(() => {
-    const promise = dispatch(getPostList())
-    return () => {
-      promise.abort()
-    }
-  }, [dispatch])
+  // isLoading chỉ dành cho lần đầu tiên
+  // isFetching là cho mỗi lần call API
+  const { data, isLoading, isFetching } = useGetPostsQuery()
 
   return (
     <div className='bg-white py-6 sm:py-8 lg:py-12'>
@@ -29,13 +22,13 @@ const PostList = () => {
           </p>
         </div>
         <div className='grid gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-2 xl:grid-cols-2 xl:gap-8'>
-          {loading ? (
+          {isFetching ? (
             <Fragment>
               <SkeletonPost />
               <SkeletonPost />
             </Fragment>
           ) : (
-            postList.length > 0 && postList.map((post) => <PostItem post={post} key={post.id} />)
+            data?.map((post) => <PostItem post={post} key={post.id} />)
           )}
         </div>
       </div>
