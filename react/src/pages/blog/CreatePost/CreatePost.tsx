@@ -1,8 +1,13 @@
+import { unwrapResult } from '@reduxjs/toolkit'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '~/store'
 import { Post } from '~/types/blog.type'
 import { addPost, cancelEditingPost, editPost } from '../blog.slice'
+
+interface ErrorForm {
+  publishDate: string
+}
 
 const initialState: Post = {
   id: '',
@@ -14,6 +19,8 @@ const initialState: Post = {
 }
 const CreatePost = () => {
   const [formData, setFormData] = useState<Post>(initialState)
+  const [errorForm, setErrorForm] = useState<null | ErrorForm>(null)
+
   const dispatch = useAppDispatch()
   const editingPost = useSelector((state: RootState) => state.blog.editingPost)
   const loading = useSelector((state: RootState) => state.blog.loading)
@@ -22,7 +29,7 @@ const CreatePost = () => {
     setFormData(editingPost || initialState)
   }, [editingPost])
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     // Edit mode
     if (editingPost) {
@@ -32,10 +39,27 @@ const CreatePost = () => {
           body: formData
         })
       )
+        .unwrap()
+        .then((res) => {
+          setFormData(initialState)
+          if (errorForm) {
+            setErrorForm(null)
+          }
+        })
+        .catch((err) => {
+          setErrorForm(err.error)
+        })
     } else {
-      dispatch(addPost(formData))
+      try {
+        await dispatch(addPost(formData)).unwrap()
+        setFormData(initialState)
+        if (errorForm) {
+          setErrorForm(null)
+        }
+      } catch (err: any) {
+        setErrorForm(err.error)
+      }
     }
-    setFormData(initialState)
   }
   const handleCancelEdittingPost = () => {
     dispatch(cancelEditingPost())
@@ -92,18 +116,32 @@ const CreatePost = () => {
         </div>
       </div>
       <div className='mb-6'>
-        <label htmlFor='publishDate' className='mb-2 block text-sm font-medium text-gray-900 dark:text-gray-300'>
+        <label
+          htmlFor='publishDate'
+          className={`mb-2 block text-sm font-medium dark:text-gray-300 
+          ${errorForm?.publishDate ? 'text-red-700' : 'text-gray-900'}`}
+        >
           Publish Date
         </label>
         <input
           type='datetime-local'
           id='publishDate'
-          className='block w-56 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-blue-500'
+          className={`block w-56 rounded-lg border p-2.5 text-sm 
+          ${
+            errorForm?.publishDate
+              ? 'border-red-500 bg-red-50 text-red-600 placeholder-red-600 focus:border-red-500 focus:ring-red-500'
+              : 'text-gray-900 border-gray-300 bg-gray-50 focus:border-blue-500 focus:outline-none focus:ring-blue-500'
+          }`}
           placeholder='.featuredImage'
           required
           value={formData.publishDate}
           onChange={(event) => setFormData((pre) => ({ ...pre, publishDate: event.target.value }))}
         />
+        {errorForm?.publishDate && (
+          <p className='mt-2 text-sm text-red-600'>
+            <span className='font-medium'>{errorForm.publishDate}</span>
+          </p>
+        )}
       </div>
       <div className='mb-6 flex items-center'>
         <input
