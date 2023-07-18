@@ -1,17 +1,14 @@
-import React from 'react'
 import { useDispatch } from 'react-redux'
-import { useAppDispatch } from '~/store'
 import { Post } from '~/types/blog.type'
-import { deletePost, startEditingPost } from '../blog.slice'
+import { startEditPost } from '../blog.slice'
 
 interface PostItemType {
   post: Post
   key: string
 }
 const PostItem = ({ post }: PostItemType) => {
-  const dispatch = useAppDispatch()
-  const handleDelete = (postId: string) => dispatch(deletePost(postId))
-  const handleStartEditing = (postId: string) => dispatch(startEditingPost(postId))
+  const dispatch = useDispatch()
+  const handleStartEditing = (postId: string) => dispatch(startEditPost(postId))
 
   return (
     <div className='flex flex-col items-center overflow-hidden rounded-lg border md:flex-row'>
@@ -39,7 +36,6 @@ const PostItem = ({ post }: PostItemType) => {
             <button
               type='button'
               className='rounded-r-lg border-t border-b border-r border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700'
-              onClick={() => handleDelete(post.id)}
             >
               Delete
             </button>

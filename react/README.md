@@ -11,3 +11,20 @@
 Endpoints có **2 kiểu** là `query` và `mutation`.
 - Query: Thường dùng cho GET
 - Mutation: Thường dùng cho các trường hợp thay đổi dữ liệu trên server như POST, PUT, DELETE
+
+## Mô hình đồng bộ dữ liệu
+Trong TH cẩn tạo mô hình sync dữ liệu danh sách bài post dưới local sau khi thêm 1 bài post
+ Thường sẽ có 2 cách tiếp cận
+- Cách 1: Đây là cách những video trước đây mình dùng
+    1. Sau khi thêm 1 bài post thì server sẽ trả về data của bài post đó
+    2. Chúng ta sẽ tiến hành lấy data đó thêm vào state redux
+    3. Lúc này UI chúng ta sẽ được sync
+
+==> Rủi ro cách này là nếu khi gọi request add post mà server trả về data không đủ các field để chúng ta hiển thị thì sẽ gặp lỗi.Nếu có nhiều người cùng add post thì data sẽ sync thiếu. Chưa kể chúng ta phải quản lý việc cập nhật state nữa, hơi mệt!
+
+- Cách 2: Đây là cách thường dùng với RTK query
+    1. Sau khi thêm 1 bài post thì server sẽ trả về data của bài post đó
+    2. Chúng ta sẽ tiến hành fetch lại API get posts để cập nhật state redux
+    3. Lúc này UI chúng ta sẽ được sync
+ 
+==> Cách này giúp data dưới local sẽ luôn mới nhất, luôn đồng bộ với server. Khuyết điểm là chúng ta sẽ tốn thêm một lần gọi API ( điều này có thể chấp nhận được)

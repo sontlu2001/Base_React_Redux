@@ -1,9 +1,5 @@
-import React, { Fragment, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState, useAppDispatch } from '~/store'
+import { Fragment } from 'react'
 import PostItem from '../PostItem'
-import http from '~/utils/http'
-import { getPostList } from '../blog.slice'
 import SkeletonPost from '../SkeletonPost'
 import { useGetPostsQuery } from '../blog.service'
 
