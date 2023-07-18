@@ -36,6 +36,10 @@ export const blogApi = createApi({
         return [{ type: 'Posts', id: 'LIST' }]
       }
     }),
+    // Sử dụng mutation đối với các trường hợp POST, PUT, DELETE
+    getPost: build.query<Post, string>({
+      query: (id) => `posts/${id}`
+    }),
     addPost: build.mutation<Post, Omit<Post, 'id'>>({
       query(body) {
         return {
@@ -55,8 +59,23 @@ export const blogApi = createApi({
           id: 'LIST'
         }
       ]
+    }),
+    updatePost: build.mutation<Post, { id: string; body: Post }>({
+      query(data) {
+        return {
+          url: `posts/${data.id}`,
+          method: 'PUT',
+          body: data.body
+        }
+      },
+      invalidatesTags: (result, error, data) => [
+        {
+          type: 'Posts',
+          id: data.id
+        }
+      ]
     })
   })
 })
 
-export const { useGetPostsQuery, useAddPostMutation } = blogApi
+export const { useGetPostsQuery, useGetPostQuery, useAddPostMutation, useUpdatePostMutation } = blogApi

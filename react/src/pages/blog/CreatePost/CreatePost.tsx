@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '~/store'
 import { Post } from '~/types/blog.type'
-import { useAddPostMutation } from '../blog.service'
+import { useAddPostMutation, useGetPostQuery, useUpdatePostMutation } from '../blog.service'
+// import { addPost, cancelEditingPost, editPost } from '../blog.slice'
 
 interface ErrorForm {
   publishDate: string
@@ -23,12 +24,31 @@ const CreatePost = () => {
   const [errorForm, setErrorForm] = useState<null | ErrorForm>(null)
   const [addPost] = useAddPostMutation()
   const postId = useSelector((state: RootState) => state.blog.postId)
+  const { data } = useGetPostQuery(postId, { skip: !postId })
+  const [updatePost] = useUpdatePostMutation()
   const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    if (data) {
+      setFormData(data)
+    }
+  }, [data])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    // Edit mode
     if (postId) {
       // EditPost mode
+      try {
+        await updatePost({
+          id: postId,
+          body: formData as Post
+        }).unwrap()
+        setFormData(initialState)
+        setErrorForm(null)
+      } catch (error: any) {
+        setErrorForm(error.data.error)
+      }
     } else {
       // AddPost mode
       try {
