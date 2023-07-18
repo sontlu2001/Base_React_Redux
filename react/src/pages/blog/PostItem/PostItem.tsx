@@ -1,5 +1,6 @@
 import { useDispatch } from 'react-redux'
 import { Post } from '~/types/blog.type'
+import { useDeletePostMutation } from '../blog.service'
 import { startEditPost } from '../blog.slice'
 
 interface PostItemType {
@@ -9,6 +10,11 @@ interface PostItemType {
 const PostItem = ({ post }: PostItemType) => {
   const dispatch = useDispatch()
   const handleStartEditing = (postId: string) => dispatch(startEditPost(postId))
+  const [deletePost] = useDeletePostMutation()
+
+  const handleDeletePost = (id:string) => {
+    deletePost(id)
+  }
 
   return (
     <div className='flex flex-col items-center overflow-hidden rounded-lg border md:flex-row'>
@@ -36,6 +42,7 @@ const PostItem = ({ post }: PostItemType) => {
             <button
               type='button'
               className='rounded-r-lg border-t border-b border-r border-gray-200 bg-white py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:text-blue-700 focus:ring-2 focus:ring-blue-700'
+              onClick={() => handleDeletePost(post.id)}
             >
               Delete
             </button>
