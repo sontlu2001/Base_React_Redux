@@ -19,6 +19,7 @@ function App() {
         <Route path='/staff' element={<StaffList></StaffList>}></Route>
         <Route path='/staff/:id' element={<StaffItem></StaffItem>}></Route>
         <Route path='/staff/add' element={<AddStaff></AddStaff>}></Route>
+        <Route path='*' element={<div>404 Not Found</div>}></Route>
       </Routes>
     </MainLayout>
   )
