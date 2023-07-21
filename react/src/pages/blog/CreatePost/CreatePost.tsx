@@ -1,14 +1,13 @@
 import { unwrapResult } from '@reduxjs/toolkit'
-import React, { useEffect, useState } from 'react'
+import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query'
+import classNames from 'classnames'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { RootState, useAppDispatch } from '~/store'
 import { Post } from '~/types/blog.type'
+import { isEntityError } from '~/utils/helpers'
 import { useAddPostMutation, useGetPostQuery, useUpdatePostMutation } from '../blog.service'
 // import { addPost, cancelEditingPost, editPost } from '../blog.slice'
-
-interface ErrorForm {
-  publishDate: string
-}
 
 const initialState: Post = {
   id: '',
@@ -18,15 +17,25 @@ const initialState: Post = {
   description: '',
   isPublic: false
 }
+// copy cac key initialState de lam key cho FormError
+type FormError = { [key in keyof typeof initialState]: string } | null
 
 const CreatePost = () => {
   const [formData, setFormData] = useState<Omit<Post, 'id'> | Post>(initialState)
-  const [errorForm, setErrorForm] = useState<null | ErrorForm>(null)
-  const [addPost] = useAddPostMutation()
+  const [addPost, addPostResult] = useAddPostMutation()
   const postId = useSelector((state: RootState) => state.blog.postId)
   const { data } = useGetPostQuery(postId, { skip: !postId })
-  const [updatePost] = useUpdatePostMutation()
+  const [updatePost, updatePostResult] = useUpdatePostMutation()
   const dispatch = useAppDispatch()
+
+  const errorForm: FormError = useMemo(() => {
+    const errorResult = postId ? updatePostResult.error : addPostResult.error
+    // Vì errorResult có thể là FetchBaseQueryError | SerializedError | undefined nên cần kiểm tra để hiển thị cho đúng
+    if (isEntityError(errorResult)) {
+      return errorResult.data.error as FormError
+    }
+    return null
+  }, [postId, addPostResult, updatePostResult])
 
   useEffect(() => {
     if (data) {
@@ -36,28 +45,21 @@ const CreatePost = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    // Edit mode
-    if (postId) {
-      // EditPost mode
-      try {
+    try {
+      if (postId) {
+        // EditPost mode
         await updatePost({
           id: postId,
           body: formData as Post
         }).unwrap()
         setFormData(initialState)
-        setErrorForm(null)
-      } catch (error: any) {
-        setErrorForm(error.data.error)
-      }
-    } else {
-      // AddPost mode
-      try {
+      } else {
+        // AddPost mode
         await addPost(formData).unwrap()
         setFormData(initialState)
-        setErrorForm(null)
-      } catch (error: any) {
-        setErrorForm(error.data.error)
       }
+    } catch (error) {
+      console.log(error)
     }
   }
 
@@ -114,20 +116,22 @@ const CreatePost = () => {
       <div className='mb-6'>
         <label
           htmlFor='publishDate'
-          className={`mb-2 block text-sm font-medium dark:text-gray-300 
-          ${errorForm?.publishDate ? 'text-red-700' : 'text-gray-900'}`}
+          className={classNames('mb-2 block text-sm font-medium dark:text-gray-300', {
+            'text-red-700': Boolean(errorForm?.publishDate),
+            'text-gray-900': !Boolean(errorForm?.publishDate)
+          })}
         >
           Publish Date
         </label>
         <input
           type='datetime-local'
           id='publishDate'
-          className={`block w-56 rounded-lg border p-2.5 text-sm 
-          ${
-            errorForm?.publishDate
-              ? 'border-red-500 bg-red-50 text-red-600 placeholder-red-600 focus:border-red-500 focus:ring-red-500'
-              : 'text-gray-900 border-gray-300 bg-gray-50 focus:border-blue-500 focus:outline-none focus:ring-blue-500'
-          }`}
+          className={classNames('block w-56 rounded-lg border p-2.5 text-sm', {
+            'border-red-500 bg-red-50 text-red-600 placeholder-red-600 focus:border-red-500 focus:ring-red-500':
+              Boolean(errorForm?.publishDate),
+            'border-gray-300 bg-gray-50 focus:border-blue-500 focus:outline-none focus:ring-blue-500 text-gray-900 ':
+              !Boolean(errorForm?.publishDate)
+          })}
           placeholder='.featuredImage'
           required
           value={formData.publishDate}
@@ -135,7 +139,8 @@ const CreatePost = () => {
         />
         {errorForm?.publishDate && (
           <p className='mt-2 text-sm text-red-600'>
-            <span className='font-medium'>{errorForm.publishDate}</span>
+            <span className='font-medium'>Lỗi!</span>
+            {errorForm.publishDate}
           </p>
         )}
       </div>

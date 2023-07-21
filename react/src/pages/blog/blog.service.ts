@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Post } from '~/types/blog.type'
+import { CustomError } from '~/utils/helpers'
 
 export const blogApi = createApi({
   reducerPath: 'blogApi', //Ten field trong Redux state
@@ -52,34 +53,42 @@ export const blogApi = createApi({
        * invalidatesTags cung cấp các tag để báo hiệu cho những method nào có providesTags
        * match với nó sẽ bị gọi lại
        * Trong trường hợp này getPosts sẽ chạy lại
+       * Nếu có error return [] => ngừng call API
        */
-      invalidatesTags: (result, error, body) => [
-        {
-          type: 'Posts',
-          id: 'LIST'
-        }
-      ]
+      invalidatesTags: (result, error, body) =>
+        error
+          ? []
+          : [
+              {
+                type: 'Posts',
+                id: 'LIST'
+              }
+            ]
     }),
     updatePost: build.mutation<Post, { id: string; body: Post }>({
       query(data) {
+        if (data.body.description.split('').length < 5) throw new CustomError('Description có ít nhất 5 kí tự!')
         return {
           url: `posts/${data.id}`,
           method: 'PUT',
           body: data.body
         }
       },
-      invalidatesTags: (result, error, data) => [
-        {
-          type: 'Posts',
-          id: data.id
-        }
-      ]
+      invalidatesTags: (result, error, data) =>
+        error
+          ? []
+          : [
+              {
+                type: 'Posts',
+                id: data.id
+              }
+            ]
     }),
-    deletePost: build.mutation<{},string>({
-      query(id){
+    deletePost: build.mutation<{}, string>({
+      query(id) {
         return {
-          url:`posts/${id}`,
-          method:'DELETE'
+          url: `posts/${id}`,
+          method: 'DELETE'
         }
       },
       invalidatesTags: (result, error, id) => [
@@ -92,4 +101,5 @@ export const blogApi = createApi({
   })
 })
 
-export const { useGetPostsQuery, useGetPostQuery, useAddPostMutation, useUpdatePostMutation,useDeletePostMutation } = blogApi
+export const { useGetPostsQuery, useGetPostQuery, useAddPostMutation, useUpdatePostMutation, useDeletePostMutation } =
+  blogApi

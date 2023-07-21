@@ -12,7 +12,7 @@ const PostItem = ({ post }: PostItemType) => {
   const handleStartEditing = (postId: string) => dispatch(startEditPost(postId))
   const [deletePost] = useDeletePostMutation()
 
-  const handleDeletePost = (id:string) => {
+  const handleDeletePost = (id: string) => {
     deletePost(id)
   }
 

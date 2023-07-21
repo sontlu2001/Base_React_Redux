@@ -23,6 +23,11 @@ server.use((req,res,next) => {
                 }
             })
         }
+        if(req.body.title.split("").length >10){
+            return res.status(500).send({
+                error:"Title không được nhiều hơn 10 kí tự!"
+            })
+        }
     }
     next()
 })
