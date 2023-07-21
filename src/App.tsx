@@ -7,6 +7,8 @@ import Dashboard from './pages/Dashboard'
 import { Route, Routes } from 'react-router'
 import About from './pages/About'
 import StaffList from './pages/StaffList'
+import StaffItem from './components/StaffItem'
+import AddStaff from './components/AddStaff'
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
         <Route path='/' element={<Dashboard></Dashboard>}></Route>
         <Route path='/about' element={<About></About>}></Route>
         <Route path='/staff' element={<StaffList></StaffList>}></Route>
+        <Route path='/staff/:id' element={<StaffItem></StaffItem>}></Route>
+        <Route path='/staff/add' element={<AddStaff></AddStaff>}></Route>
       </Routes>
     </MainLayout>
   )
