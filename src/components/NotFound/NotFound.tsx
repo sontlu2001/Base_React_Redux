@@ -5,7 +5,9 @@ const NotFound = () => {
   const navigate = useNavigate()
   useEffect(() => {
     const timeOut = setTimeout(() => {
-      navigate(-1) //Quay lại trang trước đó
+      navigate('/', {
+        state: 'Redirect from notfound'
+      })
     }, 2000)
   }, [navigate])
 
