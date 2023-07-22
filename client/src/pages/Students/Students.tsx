@@ -1,26 +1,25 @@
 import { getStudents } from 'apis/student.api'
 import { Fragment, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Students as StudentsType } from 'types/student.type'
+import {useQuery} from '@tanstack/react-query'
+ import { useParams } from 'react-router-dom'
+import { useQueryString } from 'hooks/useQueryString'
 
 export default function Students() {
-  const [students, setStudent] = useState<StudentsType>([])
-  const [isloading, setIsLoading] = useState<boolean>(true)
+  
+  const queryString:{page?: string} =  useQueryString()
+  const page = Number(queryString.page) || 1
+  const {data,isLoading} = useQuery({
+    queryKey:['student',page],
+    queryFn: () => getStudents(page,10)
+  }) 
 
-  useEffect(() => {
-    getStudents(1, 10)
-      .then((res) => {
-        setStudent(res.data)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
-  }, [])
 
   return (
     <div>
       <h1 className='text-lg'>Students</h1>
-      {isloading && (
+      {isLoading && (
         <div role='status' className='mt-6 animate-pulse'>
           <div className='mb-4 h-4  rounded bg-gray-200 dark:bg-gray-700' />
           <div className='mb-2.5 h-10  rounded bg-gray-200 dark:bg-gray-700' />
@@ -38,7 +37,7 @@ export default function Students() {
           <span className='sr-only'>Loading...</span>
         </div>
       )}
-      {!isloading && (
+      {!isLoading && (
         <Fragment>
           <div className='relative mt-6 overflow-x-auto shadow-md sm:rounded-lg'>
             <table className='w-full text-left text-sm text-gray-500 dark:text-gray-400'>
@@ -62,7 +61,7 @@ export default function Students() {
                 </tr>
               </thead>
               <tbody>
-                {students.map((student) => (
+                {data?.data.map((student) => (
                   <tr
                     key={student.id}
                     className='border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600'
