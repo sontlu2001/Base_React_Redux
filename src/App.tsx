@@ -6,6 +6,7 @@ import About from './pages/About'
 import Staff from './pages/Staff'
 import StaffItem from './components/StaffItem'
 import AddStaff from './components/AddStaff'
+import NotFound from './components/NotFound'
 
 function App() {
   const elements = useRoutes([
@@ -33,7 +34,7 @@ function App() {
     },
     {
       path: '*',
-      element: <div>404 Not Found</div>
+      element: <NotFound />
     }
   ])
   return (
