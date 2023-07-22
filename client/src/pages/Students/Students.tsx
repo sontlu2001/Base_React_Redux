@@ -2,19 +2,17 @@ import { getStudents } from 'apis/student.api'
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Students as StudentsType } from 'types/student.type'
-import {useQuery} from '@tanstack/react-query'
- import { useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { useParams } from 'react-router-dom'
 import { useQueryString } from 'hooks/useQueryString'
 
 export default function Students() {
-  
-  const queryString:{page?: string} =  useQueryString()
+  const queryString: { page?: string } = useQueryString()
   const page = Number(queryString.page) || 1
-  const {data,isLoading} = useQuery({
-    queryKey:['student',page],
-    queryFn: () => getStudents(page,10)
-  }) 
-
+  const { data, isLoading } = useQuery({
+    queryKey: ['student', page],
+    queryFn: () => getStudents(page, 10)
+  })
 
   return (
     <div>
