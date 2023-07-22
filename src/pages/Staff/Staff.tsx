@@ -1,4 +1,7 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, Route, Routes } from 'react-router-dom'
+import AddStaff from '~/components/AddStaff'
+import StaffItem from '~/components/StaffItem'
+import StaffList from '~/components/StaffList'
 
 export default function Staff() {
   return (
@@ -36,6 +39,12 @@ export default function Staff() {
           </li>
         </ul>
       </div>
+      {/* Với cách sử dụng Nested Route không sử dụng được Outlet*/}
+      <Routes>
+        <Route path=':id' element={<StaffItem></StaffItem>}></Route>
+        <Route path='add' element={<AddStaff></AddStaff>}></Route>
+        <Route index element={<StaffList></StaffList>}></Route>
+      </Routes>
       <Outlet context={{ data: 'Data outlet' }}></Outlet>
     </div>
   )
