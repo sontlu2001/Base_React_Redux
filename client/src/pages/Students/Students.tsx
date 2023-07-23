@@ -1,7 +1,7 @@
 import { getStudents } from 'apis/student.api'
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Students as StudentsType } from 'types/student.type'
+import { Student, Students as StudentsType } from 'types/student.type'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { useQueryString } from 'hooks/useQueryString'
@@ -14,7 +14,7 @@ export default function Students() {
   const { data, isLoading } = useQuery({
     queryKey: ['student', page],
     queryFn: () => getStudents(page, LIMIT),
-    keepPreviousData:true
+    keepPreviousData: true
   })
   const totalCount = Number(data?.headers['x-total-count']) || 0
   const totalPage = Math.ceil(totalCount / LIMIT)
@@ -22,6 +22,16 @@ export default function Students() {
   return (
     <div>
       <h1 className='text-lg'>Students</h1>
+      <div className='mt-6 '>
+        <Link
+          to='add'
+          className='mr-2 mb-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium 
+          text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300
+          dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
+        >
+          Add Student
+        </Link>
+      </div>
       {isLoading && (
         <div role='status' className='mt-6 animate-pulse'>
           <div className='mb-4 h-4  rounded bg-gray-200 dark:bg-gray-700' />
