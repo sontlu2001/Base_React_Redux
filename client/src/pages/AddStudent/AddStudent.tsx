@@ -1,11 +1,12 @@
-import { useMutation } from '@tanstack/react-query'
-import { addStudent } from 'apis/student.api'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { addStudent, getStudent, updateStudent } from 'apis/student.api'
 import { useMemo, useState } from 'react'
-import { useMatch } from 'react-router-dom'
+import { useMatch, useParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { Student } from 'types/student.type'
 import { isAxiosError } from 'utils/utils'
 
-type FormStateType = Omit<Student, 'id'>
+type FormStateType = Omit<Student, 'id'> | Student
 
 type FormError =
   | {
@@ -27,38 +28,58 @@ export default function AddStudent() {
   const [formState, setFormState] = useState<FormStateType>(initialFormState)
   const addMatch = useMatch('/students/add')
   const isAddMode = Boolean(addMatch)
+  const { id } = useParams()
 
-  const { mutate, error,data,reset,mutateAsync } = useMutation({
+  useQuery({
+    queryKey: ['student', id],
+    queryFn: () => getStudent(id as string),
+    enabled: id !== undefined,
+    onSuccess: (data) => {
+      setFormState(data.data)
+    }
+  })
+
+  const addStudentMutate = useMutation({
     mutationFn: (body: FormStateType) => addStudent(body)
+  })
+
+  const updateStudentMutate = useMutation({
+    mutationFn: (_) => updateStudent(id as string, formState as Student)
   })
 
   const handleChange = (name: keyof FormStateType) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormState((prev) => ({ ...prev, [name]: event.target.value }))
-    if(error||data){
-      reset()
+    if (addStudentMutate.error || addStudentMutate.data) {
+      addStudentMutate.reset()
     }
   }
 
-  const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    try {
-      const data = await mutateAsync(formState)
-      setFormState(initialFormState)
-    } catch (error) {
-      console.log(error);
+    if (isAddMode) {
+      addStudentMutate.mutate(formState, {
+        onSuccess: () => {
+          setFormState(initialFormState)
+          toast.success('Create student success!')
+        }
+      })
+    } else {
+      updateStudentMutate.mutate(undefined, {
+        onSuccess: (_) => {
+          toast.success('Update student success!')
+        }
+      })
     }
-    // mutate(formState,{
-    //   onSuccess:()=>{setFormState(initialFormState)}
-    // })
   }
 
   const errorForm: FormError = useMemo(() => {
+    const error = isAddMode ? addStudentMutate.error : updateStudentMutate.error
     if (isAxiosError<{ error: FormError }>(error) && error.response?.status === 422) {
       return error.response?.data.error
     }
     return null
-  }, [error])
-  
+  }, [addStudentMutate.error])
+
   return (
     <div>
       <h1 className='text-lg'> {isAddMode ? 'Add' : 'Edit'} Student</h1>
@@ -115,7 +136,7 @@ export default function AddStudent() {
                   type='radio'
                   name='gender'
                   value='male'
-                  checked={formState.gender === 'male'}
+                  checked={formState.gender.toLowerCase() === 'male'}
                   onChange={handleChange('gender')}
                   className='h-4 w-4 border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600'
                 />
@@ -129,7 +150,7 @@ export default function AddStudent() {
                   type='radio'
                   name='gender'
                   value='female'
-                  checked={formState.gender === 'female'}
+                  checked={formState.gender.toLowerCase() === 'female'}
                   onChange={handleChange('gender')}
                   className='h-4 w-4 border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600'
                 />
@@ -143,7 +164,7 @@ export default function AddStudent() {
                   type='radio'
                   name='gender'
                   value='other'
-                  checked={formState.gender === 'other'}
+                  checked={formState.gender.toLowerCase() === 'other'}
                   onChange={handleChange('gender')}
                   className='h-4 w-4 border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600'
                 />
