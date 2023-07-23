@@ -13,7 +13,8 @@ export default function Students() {
   const page = Number(queryString.page) || 1
   const { data, isLoading } = useQuery({
     queryKey: ['student', page],
-    queryFn: () => getStudents(page, LIMIT)
+    queryFn: () => getStudents(page, LIMIT),
+    keepPreviousData:true
   })
   const totalCount = Number(data?.headers['x-total-count']) || 0
   const totalPage = Math.ceil(totalCount / LIMIT)
