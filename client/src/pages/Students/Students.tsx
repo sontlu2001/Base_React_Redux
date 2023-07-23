@@ -1,23 +1,33 @@
-import { getStudents } from 'apis/student.api'
+import { deleteStudent, getStudents } from 'apis/student.api'
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Student, Students as StudentsType } from 'types/student.type'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { useQueryString } from 'hooks/useQueryString'
 import classNames from 'classnames'
+import { toast } from 'react-toastify'
 
 const LIMIT = 10
 export default function Students() {
   const queryString: { page?: string } = useQueryString()
   const page = Number(queryString.page) || 1
-  const { data, isLoading } = useQuery({
+  const studentQuery = useQuery({
     queryKey: ['student', page],
     queryFn: () => getStudents(page, LIMIT),
     keepPreviousData: true
   })
-  const totalCount = Number(data?.headers['x-total-count']) || 0
+  const totalCount = Number(studentQuery.data?.headers['x-total-count']) || 0
   const totalPage = Math.ceil(totalCount / LIMIT)
+  const deleteStudentMutation = useMutation({
+    mutationFn: (id: number | string) => deleteStudent(id),
+    onSuccess: (_, id) => {
+      toast.success(`Delete student success with id ${id}!`)
+    }
+  })
+  const handleDeleteStudent = (id: number | string) => {
+    deleteStudentMutation.mutate(id)
+  }
 
   return (
     <div>
@@ -32,7 +42,7 @@ export default function Students() {
           Add Student
         </Link>
       </div>
-      {isLoading && (
+      {studentQuery.isLoading && (
         <div role='status' className='mt-6 animate-pulse'>
           <div className='mb-4 h-4  rounded bg-gray-200 dark:bg-gray-700' />
           <div className='mb-2.5 h-10  rounded bg-gray-200 dark:bg-gray-700' />
@@ -50,7 +60,7 @@ export default function Students() {
           <span className='sr-only'>Loading...</span>
         </div>
       )}
-      {!isLoading && (
+      {!studentQuery.isLoading && (
         <Fragment>
           <div className='relative mt-6 overflow-x-auto shadow-md sm:rounded-lg'>
             <table className='w-full text-left text-sm text-gray-500 dark:text-gray-400'>
@@ -74,7 +84,7 @@ export default function Students() {
                 </tr>
               </thead>
               <tbody>
-                {data?.data.map((student) => (
+                {studentQuery.data?.data.map((student) => (
                   <tr
                     key={student.id}
                     className='border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600'
@@ -94,7 +104,12 @@ export default function Students() {
                       >
                         Edit
                       </Link>
-                      <button className='font-medium text-red-600 dark:text-red-500'>Delete</button>
+                      <button
+                        onClick={() => handleDeleteStudent(student.id)}
+                        className='font-medium text-red-600 dark:text-red-500'
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
