@@ -2,7 +2,7 @@ import { deleteStudent, getStudents } from 'apis/student.api'
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Student, Students as StudentsType } from 'types/student.type'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'react-router-dom'
 import { useQueryString } from 'hooks/useQueryString'
 import classNames from 'classnames'
@@ -12,19 +12,25 @@ const LIMIT = 10
 export default function Students() {
   const queryString: { page?: string } = useQueryString()
   const page = Number(queryString.page) || 1
+  const queryClient = useQueryClient()
+
   const studentQuery = useQuery({
     queryKey: ['student', page],
     queryFn: () => getStudents(page, LIMIT),
     keepPreviousData: true
   })
+
   const totalCount = Number(studentQuery.data?.headers['x-total-count']) || 0
   const totalPage = Math.ceil(totalCount / LIMIT)
+
   const deleteStudentMutation = useMutation({
     mutationFn: (id: number | string) => deleteStudent(id),
     onSuccess: (_, id) => {
       toast.success(`Delete student success with id ${id}!`)
+      queryClient.invalidateQueries({queryKey: ['student', page],exact:true})
     }
   })
+  
   const handleDeleteStudent = (id: number | string) => {
     deleteStudentMutation.mutate(id)
   }
