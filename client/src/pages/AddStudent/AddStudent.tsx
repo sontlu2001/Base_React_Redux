@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { addStudent, getStudent, updateStudent } from 'apis/student.api'
 import { useMemo, useState } from 'react'
 import { useMatch, useParams } from 'react-router-dom'
@@ -29,6 +29,7 @@ export default function AddStudent() {
   const addMatch = useMatch('/students/add')
   const isAddMode = Boolean(addMatch)
   const { id } = useParams()
+  const queryClient = useQueryClient()
 
   useQuery({
     queryKey: ['student', id],
@@ -44,7 +45,10 @@ export default function AddStudent() {
   })
 
   const updateStudentMutate = useMutation({
-    mutationFn: (_) => updateStudent(id as string, formState as Student)
+    mutationFn: (_) => updateStudent(id as string, formState as Student),
+    onSuccess: (data)=>{
+      queryClient.setQueryData(['student', id],data)
+    }
   })
 
   const handleChange = (name: keyof FormStateType) => (event: React.ChangeEvent<HTMLInputElement>) => {
