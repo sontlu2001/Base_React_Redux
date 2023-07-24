@@ -1,4 +1,4 @@
-import { deleteStudent, getStudents } from 'apis/student.api'
+import { deleteStudent, getStudent, getStudents } from 'apis/student.api'
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Student, Students as StudentsType } from 'types/student.type'
@@ -14,13 +14,13 @@ export default function Students() {
   const page = Number(queryString.page) || 1
   const queryClient = useQueryClient()
 
-  const studentQuery = useQuery({
-    queryKey: ['student', page],
+  const studentsQuery = useQuery({
+    queryKey: ['students', page],
     queryFn: () => getStudents(page, LIMIT),
     keepPreviousData: true
   })
 
-  const totalCount = Number(studentQuery.data?.headers['x-total-count']) || 0
+  const totalCount = Number(studentsQuery.data?.headers['x-total-count']) || 0
   const totalPage = Math.ceil(totalCount / LIMIT)
 
   const deleteStudentMutation = useMutation({
@@ -33,6 +33,12 @@ export default function Students() {
   
   const handleDeleteStudent = (id: number | string) => {
     deleteStudentMutation.mutate(id)
+  }
+
+  const handlePrefetchStudent = (id: number) => {
+    queryClient.prefetchQuery(['student', String(id)],{
+      queryFn:() => {getStudent(id)}
+    })
   }
 
   return (
@@ -48,7 +54,7 @@ export default function Students() {
           Add Student
         </Link>
       </div>
-      {studentQuery.isLoading && (
+      {studentsQuery.isLoading && (
         <div role='status' className='mt-6 animate-pulse'>
           <div className='mb-4 h-4  rounded bg-gray-200 dark:bg-gray-700' />
           <div className='mb-2.5 h-10  rounded bg-gray-200 dark:bg-gray-700' />
@@ -66,7 +72,7 @@ export default function Students() {
           <span className='sr-only'>Loading...</span>
         </div>
       )}
-      {!studentQuery.isLoading && (
+      {!studentsQuery.isLoading && (
         <Fragment>
           <div className='relative mt-6 overflow-x-auto shadow-md sm:rounded-lg'>
             <table className='w-full text-left text-sm text-gray-500 dark:text-gray-400'>
@@ -90,9 +96,10 @@ export default function Students() {
                 </tr>
               </thead>
               <tbody>
-                {studentQuery.data?.data.map((student) => (
+                {studentsQuery.data?.data.map((student) => (
                   <tr
                     key={student.id}
+                    onMouseEnter={()=>handlePrefetchStudent(student.id)}
                     className='border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600'
                   >
                     <td className='py-4 px-6'>{student.id}</td>
