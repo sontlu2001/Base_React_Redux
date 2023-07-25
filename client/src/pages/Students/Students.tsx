@@ -37,7 +37,8 @@ export default function Students() {
 
   const handlePrefetchStudent = (id: number) => {
     queryClient.prefetchQuery(['student', String(id)],{
-      queryFn:() => {getStudent(id)}
+      queryFn:() => getStudent(id),
+      staleTime:1000 * 10
     })
   }
 

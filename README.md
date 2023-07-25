@@ -102,3 +102,8 @@ function C() {
 - Trước khi `cacheTime` hết thì ông `C` comopnent được mount. cache data `['todos']` được trả về ngay lập tức cho `C` và `fetchTodos` sẽ chạy ngầm. Khi nó hoàn thành thì sẽ cập nhật lại cache với data mới.
 - Cuối cùng thì `C` unmount
 - Không còn ai subcribe đến cache data `['todos']` trong 5 phút tiếp theo nữa và cache data `['todos']` bị xóa hoàn toàn
+
+### Prefetching query
+`Prefetching query` là một khái niệm trong React Query, giúp **tăng cường hiệu suất** và **cải thiện trải nghiệm người dùng** trong quá trình fetch dữ liệu từ xa. 
+
+> Khi bạn `prefetch` một truy vấn (query), thì dữ liệu của truy vấn đó được lấy trước khi người dùng thực sự yêu cầu nó. Ý tưởng là trước khi người dùng chuyển đến một trang hoặc một thành phần cần dữ liệu từ xa, bạn đã sẵn sàng có dữ liệu đó sẵn có, giúp tránh sự chờ đợi không cần thiết.
