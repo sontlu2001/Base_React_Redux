@@ -1,12 +1,13 @@
 import { Student, Students } from 'types/student.type'
 import http from 'utils/http'
 
-export const getStudents = (page: number | string, limit: number | string) =>
+export const getStudents = (page: number | string, limit: number | string, signal?:AbortSignal) =>
   http.get<Students>('students', {
     params: {
       _page: page,
       _limit: limit
-    }
+    },
+    signal
   })
 
 export const getStudent = (id: string | number) => http.get<Student>(`students/${id}`)

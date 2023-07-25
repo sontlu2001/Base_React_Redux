@@ -16,8 +16,15 @@ export default function Students() {
 
   const studentsQuery = useQuery({
     queryKey: ['students', page],
-    queryFn: () => getStudents(page, LIMIT),
-    keepPreviousData: true
+    queryFn: ({signal}) => {
+      const controller = new AbortController()
+      setTimeout(()=>{
+        controller.abort() // Tự động cancle sau 5s
+      },5000) 
+      return getStudents(page, LIMIT,controller.signal)
+    },
+    keepPreviousData: true,
+    retry:0
   })
 
   const totalCount = Number(studentsQuery.data?.headers['x-total-count']) || 0
